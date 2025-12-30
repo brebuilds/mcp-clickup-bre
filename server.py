@@ -1238,6 +1238,64 @@ async def list_tools() -> List[Tool]:
                 "required": ["task_id", "field_id", "value"]
             }
         ),
+        Tool(
+            name="create_custom_field",
+            description="Create a custom field for a list",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "list_id": {
+                        "type": "string",
+                        "description": "List ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Field name"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Field type (drop_down, text, number, date, checkbox, currency, email, phone, url, rating, label)"
+                    },
+                    "type_config": {
+                        "type": "object",
+                        "description": "Type-specific configuration (e.g., options for drop_down)"
+                    }
+                },
+                "required": ["list_id", "name", "type"]
+            }
+        ),
+        Tool(
+            name="delete_custom_field",
+            description="Delete a custom field",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "field_id": {
+                        "type": "string",
+                        "description": "Custom field ID"
+                    }
+                },
+                "required": ["field_id"]
+            }
+        ),
+        Tool(
+            name="remove_custom_field_value",
+            description="Remove a custom field value from a task",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Task ID"
+                    },
+                    "field_id": {
+                        "type": "string",
+                        "description": "Custom field ID"
+                    }
+                },
+                "required": ["task_id", "field_id"]
+            }
+        ),
         # Views
         Tool(
             name="get_views",
@@ -1511,6 +1569,20 @@ async def list_tools() -> List[Tool]:
                 "required": ["webhook_id"]
             }
         ),
+        Tool(
+            name="delete_webhook",
+            description="Delete a webhook",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "webhook_id": {
+                        "type": "string",
+                        "description": "Webhook ID"
+                    }
+                },
+                "required": ["webhook_id"]
+            }
+        ),
         # Documents
         Tool(
             name="search_documents",
@@ -1542,6 +1614,90 @@ async def list_tools() -> List[Tool]:
                     }
                 },
                 "required": ["document_id"]
+            }
+        ),
+        Tool(
+            name="create_document",
+            description="Create a new document with rich formatting",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Document name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Document content (supports markdown/HTML)"
+                    },
+                    "parent_id": {
+                        "type": "string",
+                        "description": "Parent document/page ID (optional)"
+                    }
+                },
+                "required": ["workspace_id", "name"]
+            }
+        ),
+        Tool(
+            name="update_document",
+            description="Update a document with formatting and embeds",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "document_id": {
+                        "type": "string",
+                        "description": "Document ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "New document name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "New document content (supports markdown/HTML)"
+                    }
+                },
+                "required": ["document_id"]
+            }
+        ),
+        Tool(
+            name="delete_document",
+            description="Delete a document",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "document_id": {
+                        "type": "string",
+                        "description": "Document ID"
+                    }
+                },
+                "required": ["document_id"]
+            }
+        ),
+        Tool(
+            name="create_document_page",
+            description="Create a page in a document",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "document_id": {
+                        "type": "string",
+                        "description": "Document ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Page name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Page content"
+                    }
+                },
+                "required": ["document_id", "name"]
             }
         ),
         # Checklists
@@ -1730,6 +1886,424 @@ async def list_tools() -> List[Tool]:
                     }
                 },
                 "required": ["workspace_id"]
+            }
+        ),
+        # Bulk Operations
+        Tool(
+            name="bulk_create_tasks",
+            description="Batch create multiple tasks efficiently",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "list_id": {
+                        "type": "string",
+                        "description": "List ID"
+                    },
+                    "tasks": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of task objects to create"
+                    }
+                },
+                "required": ["list_id", "tasks"]
+            }
+        ),
+        Tool(
+            name="bulk_update_tasks",
+            description="Batch update multiple tasks efficiently",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "tasks": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of task objects with id and fields to update"
+                    }
+                },
+                "required": ["tasks"]
+            }
+        ),
+        Tool(
+            name="bulk_delete_tasks",
+            description="Batch delete multiple tasks",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "task_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Array of task IDs to delete"
+                    }
+                },
+                "required": ["task_ids"]
+            }
+        ),
+        # Automation Rules
+        Tool(
+            name="get_automations",
+            description="Get automation rules for a workspace",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    }
+                },
+                "required": ["workspace_id"]
+            }
+        ),
+        Tool(
+            name="get_automation",
+            description="Get a specific automation rule",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "automation_id": {
+                        "type": "string",
+                        "description": "Automation ID"
+                    }
+                },
+                "required": ["automation_id"]
+            }
+        ),
+        Tool(
+            name="create_automation",
+            description="Create a new automation rule",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Automation name"
+                    },
+                    "trigger": {
+                        "type": "object",
+                        "description": "Trigger configuration"
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Actions to perform"
+                    },
+                    "space_id": {
+                        "type": "string",
+                        "description": "Space ID to apply automation"
+                    }
+                },
+                "required": ["workspace_id", "name", "trigger", "actions"]
+            }
+        ),
+        Tool(
+            name="update_automation",
+            description="Update an automation rule",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "automation_id": {
+                        "type": "string",
+                        "description": "Automation ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "New automation name"
+                    },
+                    "trigger": {
+                        "type": "object",
+                        "description": "New trigger configuration"
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "New actions to perform"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Enable/disable automation"
+                    }
+                },
+                "required": ["automation_id"]
+            }
+        ),
+        Tool(
+            name="delete_automation",
+            description="Delete an automation rule",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "automation_id": {
+                        "type": "string",
+                        "description": "Automation ID"
+                    }
+                },
+                "required": ["automation_id"]
+            }
+        ),
+        # Enhanced Template Operations
+        Tool(
+            name="create_task_template",
+            description="Create a new task template",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Template name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Template description"
+                    },
+                    "task_data": {
+                        "type": "object",
+                        "description": "Default task data for template"
+                    }
+                },
+                "required": ["workspace_id", "name"]
+            }
+        ),
+        Tool(
+            name="update_task_template",
+            description="Update a task template",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "description": "Template ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "New template name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "New template description"
+                    },
+                    "task_data": {
+                        "type": "object",
+                        "description": "Updated default task data"
+                    }
+                },
+                "required": ["template_id"]
+            }
+        ),
+        Tool(
+            name="delete_task_template",
+            description="Delete a task template",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "description": "Template ID"
+                    }
+                },
+                "required": ["template_id"]
+            }
+        ),
+        # Delete Operations
+        Tool(
+            name="delete_space",
+            description="Delete a space",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "space_id": {
+                        "type": "string",
+                        "description": "Space ID"
+                    }
+                },
+                "required": ["space_id"]
+            }
+        ),
+        Tool(
+            name="delete_folder",
+            description="Delete a folder",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "folder_id": {
+                        "type": "string",
+                        "description": "Folder ID"
+                    }
+                },
+                "required": ["folder_id"]
+            }
+        ),
+        Tool(
+            name="delete_list",
+            description="Delete a list",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "list_id": {
+                        "type": "string",
+                        "description": "List ID"
+                    }
+                },
+                "required": ["list_id"]
+            }
+        ),
+        Tool(
+            name="delete_task",
+            description="Delete a task",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Task ID"
+                    }
+                },
+                "required": ["task_id"]
+            }
+        ),
+        Tool(
+            name="delete_comment",
+            description="Delete a comment",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "comment_id": {
+                        "type": "string",
+                        "description": "Comment ID"
+                    }
+                },
+                "required": ["comment_id"]
+            }
+        ),
+        Tool(
+            name="delete_goal",
+            description="Delete a goal",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "goal_id": {
+                        "type": "string",
+                        "description": "Goal ID"
+                    }
+                },
+                "required": ["goal_id"]
+            }
+        ),
+        Tool(
+            name="delete_key_result",
+            description="Delete a key result",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "key_result_id": {
+                        "type": "string",
+                        "description": "Key result ID"
+                    }
+                },
+                "required": ["key_result_id"]
+            }
+        ),
+        # Dashboard & Analytics
+        Tool(
+            name="get_workspace_dashboard",
+            description="Get dashboard data for a workspace",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    },
+                    "date_from": {
+                        "type": "integer",
+                        "description": "Start date timestamp"
+                    },
+                    "date_to": {
+                        "type": "integer",
+                        "description": "End date timestamp"
+                    }
+                },
+                "required": ["workspace_id"]
+            }
+        ),
+        Tool(
+            name="get_space_dashboard",
+            description="Get dashboard data for a space",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "space_id": {
+                        "type": "string",
+                        "description": "Space ID"
+                    },
+                    "date_from": {
+                        "type": "integer",
+                        "description": "Start date timestamp"
+                    },
+                    "date_to": {
+                        "type": "integer",
+                        "description": "End date timestamp"
+                    }
+                },
+                "required": ["space_id"]
+            }
+        ),
+        Tool(
+            name="get_task_analytics",
+            description="Get analytics data for tasks",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "workspace_id": {
+                        "type": "string",
+                        "description": "Workspace ID"
+                    },
+                    "space_id": {
+                        "type": "string",
+                        "description": "Space ID filter (optional)"
+                    },
+                    "date_from": {
+                        "type": "integer",
+                        "description": "Start date timestamp"
+                    },
+                    "date_to": {
+                        "type": "integer",
+                        "description": "End date timestamp"
+                    }
+                },
+                "required": ["workspace_id"]
+            }
+        ),
+        Tool(
+            name="get_time_tracking_report",
+            description="Get time tracking report data",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "team_id": {
+                        "type": "string",
+                        "description": "Team ID"
+                    },
+                    "date_from": {
+                        "type": "integer",
+                        "description": "Start date timestamp"
+                    },
+                    "date_to": {
+                        "type": "integer",
+                        "description": "End date timestamp"
+                    },
+                    "assignee": {
+                        "type": "string",
+                        "description": "Filter by assignee ID"
+                    }
+                },
+                "required": ["team_id"]
             }
         ),
     ]
@@ -2141,6 +2715,28 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             response = await client.post(f"/task/{task_id}/field/{field_id}", json=data)
             return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
 
+        elif name == "create_custom_field":
+            list_id = arguments["list_id"]
+            data = {
+                "name": arguments["name"],
+                "type": arguments["type"]
+            }
+            if "type_config" in arguments:
+                data["type_config"] = arguments["type_config"]
+            response = await client.post(f"/list/{list_id}/field", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "delete_custom_field":
+            field_id = arguments["field_id"]
+            response = await client.delete(f"/field/{field_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Custom field deleted"}, indent=2))]
+
+        elif name == "remove_custom_field_value":
+            task_id = arguments["task_id"]
+            field_id = arguments["field_id"]
+            response = await client.delete(f"/task/{task_id}/field/{field_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Custom field value removed"}, indent=2))]
+
         # Views
         elif name == "get_views":
             if "workspace_id" in arguments:
@@ -2250,6 +2846,11 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             response = await client.put(f"/webhook/{webhook_id}", json=data)
             return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
 
+        elif name == "delete_webhook":
+            webhook_id = arguments["webhook_id"]
+            response = await client.delete(f"/webhook/{webhook_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Webhook deleted"}, indent=2))]
+
         # Documents
         elif name == "search_documents":
             workspace_id = arguments["workspace_id"]
@@ -2262,6 +2863,40 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
         elif name == "get_document":
             document_id = arguments["document_id"]
             response = await client.get(f"/doc/{document_id}")
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "create_document":
+            workspace_id = arguments["workspace_id"]
+            data = {"name": arguments["name"]}
+            if "content" in arguments:
+                data["content"] = arguments["content"]
+            if "parent_id" in arguments:
+                data["parent_id"] = arguments["parent_id"]
+            response = await client.post(f"/team/{workspace_id}/doc", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "update_document":
+            document_id = arguments["document_id"]
+            data = {}
+            if "name" in arguments:
+                data["name"] = arguments["name"]
+            if "content" in arguments:
+                data["content"] = arguments["content"]
+            response = await client.put(f"/doc/{document_id}", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "delete_document":
+            document_id = arguments["document_id"]
+            response = await client.delete(f"/doc/{document_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Document deleted"}, indent=2))]
+
+        elif name == "create_document_page":
+            document_id = arguments["document_id"]
+            data = {
+                "name": arguments["name"],
+                "content": arguments.get("content", "")
+            }
+            response = await client.post(f"/doc/{document_id}/page", json=data)
             return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
 
         # Checklists
@@ -2333,6 +2968,185 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
         elif name == "get_shared_hierarchy":
             workspace_id = arguments["workspace_id"]
             response = await client.get(f"/team/{workspace_id}/shared")
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        # Bulk Operations
+        elif name == "bulk_create_tasks":
+            list_id = arguments["list_id"]
+            tasks = arguments["tasks"]
+            results = []
+            for task_data in tasks:
+                try:
+                    response = await client.post(f"/list/{list_id}/task", json=task_data)
+                    results.append({"success": True, "data": response.json()})
+                except Exception as e:
+                    results.append({"success": False, "error": str(e), "task": task_data})
+            return [TextContent(type="text", text=json.dumps({"results": results, "total": len(tasks), "successful": sum(1 for r in results if r.get("success"))}, indent=2))]
+
+        elif name == "bulk_update_tasks":
+            tasks = arguments["tasks"]
+            results = []
+            for task_update in tasks:
+                try:
+                    task_id = task_update.pop("id")
+                    response = await client.put(f"/task/{task_id}", json=task_update)
+                    results.append({"success": True, "task_id": task_id, "data": response.json()})
+                except Exception as e:
+                    results.append({"success": False, "error": str(e), "task": task_update})
+            return [TextContent(type="text", text=json.dumps({"results": results, "total": len(tasks), "successful": sum(1 for r in results if r.get("success"))}, indent=2))]
+
+        elif name == "bulk_delete_tasks":
+            task_ids = arguments["task_ids"]
+            results = []
+            for task_id in task_ids:
+                try:
+                    response = await client.delete(f"/task/{task_id}")
+                    results.append({"success": True, "task_id": task_id})
+                except Exception as e:
+                    results.append({"success": False, "task_id": task_id, "error": str(e)})
+            return [TextContent(type="text", text=json.dumps({"results": results, "total": len(task_ids), "successful": sum(1 for r in results if r.get("success"))}, indent=2))]
+
+        # Automation Rules
+        elif name == "get_automations":
+            workspace_id = arguments["workspace_id"]
+            response = await client.get(f"/team/{workspace_id}/automation")
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "get_automation":
+            automation_id = arguments["automation_id"]
+            response = await client.get(f"/automation/{automation_id}")
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "create_automation":
+            workspace_id = arguments["workspace_id"]
+            data = {
+                "name": arguments["name"],
+                "trigger": arguments["trigger"],
+                "actions": arguments["actions"]
+            }
+            if "space_id" in arguments:
+                data["space_id"] = arguments["space_id"]
+            response = await client.post(f"/team/{workspace_id}/automation", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "update_automation":
+            automation_id = arguments["automation_id"]
+            data = {}
+            for key in ["name", "trigger", "actions", "enabled"]:
+                if key in arguments:
+                    data[key] = arguments[key]
+            response = await client.put(f"/automation/{automation_id}", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "delete_automation":
+            automation_id = arguments["automation_id"]
+            response = await client.delete(f"/automation/{automation_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Automation deleted"}, indent=2))]
+
+        # Enhanced Template Operations
+        elif name == "create_task_template":
+            workspace_id = arguments["workspace_id"]
+            data = {"name": arguments["name"]}
+            if "description" in arguments:
+                data["description"] = arguments["description"]
+            if "task_data" in arguments:
+                data["task_data"] = arguments["task_data"]
+            response = await client.post(f"/team/{workspace_id}/taskTemplate", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "update_task_template":
+            template_id = arguments["template_id"]
+            data = {}
+            for key in ["name", "description", "task_data"]:
+                if key in arguments:
+                    data[key] = arguments[key]
+            response = await client.put(f"/taskTemplate/{template_id}", json=data)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "delete_task_template":
+            template_id = arguments["template_id"]
+            response = await client.delete(f"/taskTemplate/{template_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Template deleted"}, indent=2))]
+
+        # Delete Operations
+        elif name == "delete_space":
+            space_id = arguments["space_id"]
+            response = await client.delete(f"/space/{space_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Space deleted"}, indent=2))]
+
+        elif name == "delete_folder":
+            folder_id = arguments["folder_id"]
+            response = await client.delete(f"/folder/{folder_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Folder deleted"}, indent=2))]
+
+        elif name == "delete_list":
+            list_id = arguments["list_id"]
+            response = await client.delete(f"/list/{list_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "List deleted"}, indent=2))]
+
+        elif name == "delete_task":
+            task_id = arguments["task_id"]
+            response = await client.delete(f"/task/{task_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Task deleted"}, indent=2))]
+
+        elif name == "delete_comment":
+            comment_id = arguments["comment_id"]
+            response = await client.delete(f"/comment/{comment_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Comment deleted"}, indent=2))]
+
+        elif name == "delete_goal":
+            goal_id = arguments["goal_id"]
+            response = await client.delete(f"/goal/{goal_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Goal deleted"}, indent=2))]
+
+        elif name == "delete_key_result":
+            key_result_id = arguments["key_result_id"]
+            response = await client.delete(f"/key_result/{key_result_id}")
+            return [TextContent(type="text", text=json.dumps({"success": True, "message": "Key result deleted"}, indent=2))]
+
+        # Dashboard & Analytics
+        elif name == "get_workspace_dashboard":
+            workspace_id = arguments["workspace_id"]
+            params = {}
+            if "date_from" in arguments:
+                params["date_from"] = arguments["date_from"]
+            if "date_to" in arguments:
+                params["date_to"] = arguments["date_to"]
+            response = await client.get(f"/team/{workspace_id}/dashboard", params=params)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "get_space_dashboard":
+            space_id = arguments["space_id"]
+            params = {}
+            if "date_from" in arguments:
+                params["date_from"] = arguments["date_from"]
+            if "date_to" in arguments:
+                params["date_to"] = arguments["date_to"]
+            response = await client.get(f"/space/{space_id}/dashboard", params=params)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "get_task_analytics":
+            workspace_id = arguments["workspace_id"]
+            params = {}
+            if "space_id" in arguments:
+                params["space_id"] = arguments["space_id"]
+            if "date_from" in arguments:
+                params["date_from"] = arguments["date_from"]
+            if "date_to" in arguments:
+                params["date_to"] = arguments["date_to"]
+            response = await client.get(f"/team/{workspace_id}/task/analytics", params=params)
+            return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
+
+        elif name == "get_time_tracking_report":
+            team_id = arguments["team_id"]
+            params = {}
+            if "date_from" in arguments:
+                params["date_from"] = arguments["date_from"]
+            if "date_to" in arguments:
+                params["date_to"] = arguments["date_to"]
+            if "assignee" in arguments:
+                params["assignee"] = arguments["assignee"]
+            response = await client.get(f"/team/{team_id}/time_entries/report", params=params)
             return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
 
         else:
