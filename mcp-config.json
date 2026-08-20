@@ -2,7 +2,7 @@
   "mcpServers": {
     "clickup": {
       "command": "python",
-      "args": ["/Users/bre/mcp-clickup-bre/server.py"],
+      "args": ["/path/to/mcp-clickup-bre/server.py"],
       "env": {
         "CLICKUP_API_TOKEN": "your_api_token_here"
       }
