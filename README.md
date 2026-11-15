@@ -1,5 +1,7 @@
 # ClickUp MCP Server
 
+[![CI](https://github.com/brebuilds/mcp-clickup-bre/actions/workflows/ci.yml/badge.svg)](https://github.com/brebuilds/mcp-clickup-bre/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the ClickUp API v2 as **101 tools** an MCP-compatible client (Claude Desktop, Cursor, or any other MCP host) can call directly — workspaces, tasks, time tracking, goals, custom fields, documents, webhooks, automations, bulk operations, and more.
 
 It's a thin, predictable translation layer: each tool takes a small, explicit set of arguments, makes one (or a small batch of) authenticated HTTP calls to `api.clickup.com`, and returns ClickUp's JSON response, pretty-printed, as the tool result.
